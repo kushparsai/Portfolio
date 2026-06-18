@@ -1,23 +1,37 @@
 import express from "express";
-import mongoose from "mongoose";
-import cors from "cors";
 import dotenv from "dotenv";
-import contactRoutes from "./routes/contact.js";
+import cors from "cors";
+import mongoose from "mongoose";
+import contactRoutes from "./routes/contactRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+/* ✅ FIXED CORS (ALLOW ALL LOCALHOST PORTS) */
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "http://localhost:8080",
+  ],
+  credentials: true,
+}));
+
 app.use(express.json());
 
-app.use("/api/contact", contactRoutes);
-
-mongoose
-  .connect(process.env.MONGO_URI)
+// MongoDB
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.error(err));
 
-app.listen(process.env.PORT, () =>
-  console.log(`Server running on port ${process.env.PORT}`)
+// Routes
+app.use("/api/contact", contactRoutes);
+
+app.get("/api/test", (req, res) => {
+  res.json({ ok: true });
+});
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () =>
+  console.log(`Server running on http://localhost:${PORT}`)
 );
